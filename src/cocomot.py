@@ -12,7 +12,10 @@ from utils import pad_to, spaces
 from options import *
 from smt.ysolver import YicesSolver
 from smt.z3solver import Z3Solver
-from smt.omsolver import OptiMathsatSolver
+try:
+  from smt.omsolver import OptiMathsatSolver
+except ImportError:
+  OptiMathsatSolver = None  # OptiMathSAT bindings are optional
 #from smt.cvc5solver import CVC5Solver
 from dpn.read import read_json_input, read_pnml_input
 from cluster.partitioning import NaivePartitioning, IntervalPartitioning
@@ -25,7 +28,10 @@ import uncertainty.read
 from uncertainty.encoding import UncertaintyEncoding
 from uncertainty.trace import UncertainTrace, UncertainLog, UncertainDataValue
 from uncertainty.uncertainize import all as uncertainize_all, extending as uncertainty_extending
-from glocal.glocal_conformance import conformance_check as glocal_conformance_check
+try:
+  from glocal.glocal_conformance import conformance_check as glocal_conformance_check
+except ImportError:
+  glocal_conformance_check = None  # glocal conformance checking is optional/WIP
 
 ### printing
 
@@ -608,6 +614,9 @@ if __name__ == "__main__":
     log = uncertainty.read.xes(options.log)
     compute_realizations(log)
   elif options.glocal:
+    if glocal_conformance_check is None:
+      print("glocal conformance checking is unavailable (glocal.encoding module missing).")
+      exit(0)
     if None in options.model:
       print("DPN file does not exist.")
       exit(0)
