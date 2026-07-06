@@ -33,6 +33,7 @@
             <name>
                <text>a</text>
             </name>
+            <writeVariable>x</writeVariable>
          </transition>
          <transition id="tb">
             <name>

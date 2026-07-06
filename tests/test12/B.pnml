@@ -30,10 +30,11 @@
             </finalMarking>
          </place>
          
-         <transition id="tb" guard="(x &gt; 0)">
+         <transition id="tb" guard="(x' &gt; 0)">
             <name>
                <text>b</text>
             </name>
+            <writeVariable>x</writeVariable>
          </transition>
          <transition id="tc">
             <name>
