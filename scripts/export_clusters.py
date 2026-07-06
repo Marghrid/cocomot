@@ -7,9 +7,11 @@ representative back to its ORIGINAL pm4py trace (by object identity) and write t
 untouched original -- keeping timestamps, resources and every other attribute.
 
 Usage:
-  python3 scripts/export_clusters.py <model.pnml> <log.xes> <out.xes> [--no-count-attr]
+  python3 scripts/export_clusters.py <model.pnml> <log.xes> <out.xes> [--no-count-attr] [--naive-only]
 
   --no-count-attr   do not add the additive cocomot:cluster_size trace attribute
+  --naive-only      stop after the naive partitioning stage (exact activity
+                    sequence + valuation); skip the interval/symbolic stage
 """
 import os
 import sys
@@ -88,6 +90,7 @@ def main():
     sys.exit(1)
   model, logpath, outpath = sys.argv[1], sys.argv[2], sys.argv[3]
   add_count = "--no-count-attr" not in sys.argv[4:]
+  naive_only = "--naive-only" in sys.argv[4:]
 
   dpn = DPN(read_pnml_input(model))
   (log, _unc) = read_log(logpath)
@@ -103,10 +106,15 @@ def main():
     entries.append((s, 1))
 
   naive = NaivePartitioning(entries)
-  interval = IntervalPartitioning(dpn, naive.representatives())
-  reps = interval.partitions
-  print("clusters: naive=%d interval=%d" %
-        (naive.partition_count(), interval.partition_count()))
+  if naive_only:
+    reps = naive.partitions
+    print("clusters: naive=%d (naive-only, interval stage skipped)" %
+          naive.partition_count())
+  else:
+    interval = IntervalPartitioning(dpn, naive.representatives())
+    reps = interval.partitions
+    print("clusters: naive=%d interval=%d" %
+          (naive.partition_count(), interval.partition_count()))
 
   out = EventLog(
     attributes=getattr(log, "attributes", {}),
